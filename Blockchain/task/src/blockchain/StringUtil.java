@@ -21,4 +21,12 @@ class StringUtil {
             throw new RuntimeException(e);
         }
     }
+
+    public static boolean isStartWithNZeros(String input, int zeros) {
+        for (int i = 0; i < zeros; i++) {
+            if (input.charAt(i) != '0')
+                return false;
+        }
+        return true;
+    }
 }
