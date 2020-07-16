@@ -5,21 +5,24 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Blockchain implements java.io.Serializable {
-    final private int zeros;
     final private List<Block> chain;
 
-    Blockchain(int zeros) {
-        this.zeros = zeros;
+    Blockchain() {
         chain = new LinkedList<>();
     }
 
-    void generate() {
-        if (chain.isEmpty()) {
-            chain.add(new Block(0, "0", zeros));
-        } else {
-            Block last = chain.get(chain.size() - 1);
-            chain.add(new Block(last.getId(), last.getThisHash(), zeros));
-        }
+    boolean isEmpty() {
+        return chain.isEmpty();
+    }
+
+    Block lastBlock() {
+        return chain.get(chain.size() - 1);
+    }
+
+    void append(Block b) throws Exception {
+        chain.add(b);
+        if (!validate())
+            throw new Exception("Attempt to append a block invalidating the whole chain.");
     }
 
     boolean validate() {

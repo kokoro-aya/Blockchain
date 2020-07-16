@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Random;
 
 public class Block implements Serializable {
+    final private int creator;
     final private int id;
     private long timestamp;
     private long magicNumber;
@@ -12,7 +13,8 @@ public class Block implements Serializable {
     private String thisHash;
     private long generationTime;
 
-    Block(int id, String prevHash, int zeros) {
+    Block(int creator, int id, String prevHash, int zeros) {
+        this.creator = creator;
         this.id = id + 1;
         this.prevHash = prevHash;
         long st = System.currentTimeMillis();
@@ -29,6 +31,10 @@ public class Block implements Serializable {
         this.thisHash = hs;
         long fi = System.currentTimeMillis();
         generationTime = (fi - st) / 1000;
+    }
+
+    public int getCreator() {
+        return creator;
     }
 
     int getId() {
@@ -49,6 +55,7 @@ public class Block implements Serializable {
 
     void print() {
         System.out.println("Block:");
+        System.out.println("Created by miner # " + creator);
         System.out.println("Id: " + id);
         System.out.println("Timestamp: " + timestamp);
         System.out.println("Magic number: " + magicNumber);
@@ -56,6 +63,6 @@ public class Block implements Serializable {
         System.out.println(prevHash);
         System.out.println("Hash of the block:");
         System.out.println(thisHash);
-        System.out.println("Block was generating for " + generationTime + " seconds");
+//        System.out.println("Block was generating for " + generationTime + " seconds");
     }
 }
