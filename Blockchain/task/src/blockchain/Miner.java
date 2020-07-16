@@ -11,20 +11,22 @@ public class Miner implements java.io.Serializable, Callable<Block> {
     private boolean empty;
 
     private int zeros;
+    private Messager messager;
 
     Miner(int zeros) {
         this.blockchain = new Blockchain();
         this.zeros = zeros;
         this.id = ++count;
+        this.messager = null;
     }
 
     private Block generate() {
         Block newBlock;
         if (blockchain.isEmpty()) {
-            newBlock = new Block(id, 0, "0", zeros);
+            newBlock = new Block(id, 0, "0", zeros, messager);
         } else {
             var oldBlock = blockchain.lastBlock();
-            newBlock = new Block(id, oldBlock.getId(), oldBlock.getThisHash(), zeros);
+            newBlock = new Block(id, oldBlock.getId(), oldBlock.getThisHash(), zeros, messager);
         }
         return newBlock;
     }
@@ -87,5 +89,9 @@ public class Miner implements java.io.Serializable, Callable<Block> {
     @Override
     public Block call() throws Exception {
         return generate();
+    }
+
+    public void acceptMessage(Messager messager) {
+        this.messager = messager;
     }
 }
