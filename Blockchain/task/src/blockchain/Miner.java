@@ -1,32 +1,44 @@
 package blockchain;
 
 import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 public class Miner implements java.io.Serializable, Callable<Block> {
     private Blockchain blockchain;
+    private Wallet wallet;
 
     final private int id;
     private static int count;
     private boolean empty;
 
     private int zeros;
-    private Messager messager;
+    private List<Transaction> datapool;
 
     Miner(int zeros) {
         this.blockchain = new Blockchain();
         this.zeros = zeros;
         this.id = ++count;
-        this.messager = null;
+        this.datapool = new LinkedList<>();
+    }
+
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
+    }
+
+    public Wallet getWallet() {
+        return this.wallet;
     }
 
     private Block generate() {
         Block newBlock;
+        datapool.add(new Transaction(null, this.wallet, 100));
         if (blockchain.isEmpty()) {
-            newBlock = new Block(id, 0, "0", zeros, messager);
+            newBlock = new Block(id, 0, "0", zeros, datapool);
         } else {
             var oldBlock = blockchain.lastBlock();
-            newBlock = new Block(id, oldBlock.getId(), oldBlock.getThisHash(), zeros, messager);
+            newBlock = new Block(id, oldBlock.getId(), oldBlock.getThisHash(), zeros, datapool);
         }
         return newBlock;
     }
@@ -46,6 +58,10 @@ public class Miner implements java.io.Serializable, Callable<Block> {
             e.printStackTrace();
             return false;
         }
+    }
+
+    void appendData(List<Transaction> data) {
+        this.datapool.addAll(data);
     }
 
     boolean serialize() {
@@ -91,7 +107,11 @@ public class Miner implements java.io.Serializable, Callable<Block> {
         return generate();
     }
 
-    public void acceptMessage(Messager messager) {
-        this.messager = messager;
+    public int getAmountOf(String owner) throws Exception {
+        return blockchain.query(owner);
+    }
+
+    public void clearDataPool() {
+        this.datapool.clear();
     }
 }

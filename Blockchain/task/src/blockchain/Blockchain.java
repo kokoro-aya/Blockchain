@@ -48,4 +48,22 @@ public class Blockchain implements java.io.Serializable {
             System.out.println();
         }
     }
+
+    public int query(String owner) throws Exception {
+        int cnt = 0;
+        for (var b: chain) {
+            for (var t: b.getTx()) {
+                if (t.src != null && t.src.getOwner().equals(owner)) {
+                    cnt -= t.amount;
+                }
+                if (t.dest != null && t.dest.getOwner().equals(owner)) {
+                    cnt += t.amount;
+                }
+                if (cnt < 0) {
+                    throw new Exception("Balance cannot be negative!");
+                }
+            }
+        }
+        return cnt;
+    }
 }

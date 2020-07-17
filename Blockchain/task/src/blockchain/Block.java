@@ -2,44 +2,40 @@ package blockchain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 public class Block implements Serializable {
-    final private int creator;
-    final private int id;
+    private final int creator;
+    private final int id;
     private final long timestamp;
     private final long magicNumber;
-    final private String prevHash;
+    private final String prevHash;
     private final String thisHash;
-    private long generationTime;
-    final private Messager messager;
+    private final long generationTime;
 
-    Block(int creator, int id, String prevHash, int zeros, Messager messager) {
+    private final List<Transaction> tx;
+
+    Block(int creator, int id, String prevHash, int zeros, List<Transaction> tx) {
         this.creator = creator;
         this.id = id + 1;
         this.prevHash = prevHash;
-        this.messager = messager;
         long st = System.currentTimeMillis();
         long ts = new Date().getTime();
         long mn = new Random().nextLong();
         String hs;
-        if (messager == null) {
-            hs = StringUtil.applySha256(id + " " + ts + " " + mn + " " + prevHash + "\n" + "empty");
-        } else {
-            hs = StringUtil.applySha256(id + " " + ts + " " + mn + " " + prevHash + "\n" + messager.toString());
-        };
+        hs = StringUtil.applySha256(id + " " + ts + " " + mn + " " + prevHash + " " + tx.hashCode());
+        ;
         while (!StringUtil.isStartWithNZeros(hs, zeros)) {
             ts = new Date().getTime();
             mn = new Random().nextLong();
-            if (messager == null) {
-                hs = StringUtil.applySha256(id + " " + ts + " " + mn + " " + prevHash + "\n" + "empty");
-            } else {
-                hs = StringUtil.applySha256(id + " " + ts + " " + mn + " " + prevHash + "\n" + messager.toString());
-            }
+            hs = StringUtil.applySha256(id + " " + ts + " " + mn + " " + prevHash + " " + tx.hashCode());
         }
         this.timestamp = ts;
         this.magicNumber = mn;
         this.thisHash = hs;
+        this.tx = new LinkedList<>(tx);
         long fi = System.currentTimeMillis();
         generationTime = (fi - st) / 1000;
     }
@@ -64,9 +60,14 @@ public class Block implements Serializable {
         return thisHash;
     }
 
+    public List<Transaction> getTx() {
+        return tx;
+    }
+
     void print() {
         System.out.println("Block:");
         System.out.println("Created by miner # " + creator);
+        System.out.println("miner" + creator + " gets 100 VC");
         System.out.println("Id: " + id);
         System.out.println("Timestamp: " + timestamp);
         System.out.println("Magic number: " + magicNumber);
@@ -74,11 +75,15 @@ public class Block implements Serializable {
         System.out.println(prevHash);
         System.out.println("Hash of the block:");
         System.out.println(thisHash);
-        if (messager == null) {
-            System.out.println("Block data: no messages");
+        System.out.println("Block data:");
+        if (tx.size() == 1) {
+            System.out.println("No transactions");
         } else {
-            System.out.println("Block data: ");
-            System.out.print(messager.toString());
+            tx.forEach(e -> {
+                if (e.src != null) {
+                    System.out.println(e.toString());
+                }
+            });
         }
 //        System.out.println("Block was generating for " + generationTime + " seconds");
     }
